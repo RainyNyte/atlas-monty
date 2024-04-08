@@ -9,57 +9,42 @@
  * @line_number: the current line number in the file
 */
 
-void get_instruction(stack_t **stack, char arg_str, unsigned int line_number)
+void get_instruction(stack_t **stack, char* opcode, unsigned int line_number)
 {
 	instruction_t instructions[] = {
 		{"push", &push},
 		{"pall", &pall},
 		{NULL, NULL}
 		};
+	char *arg_str;
+	int i;
 
-	while (fgets(line, sizeof(line), file))
+	for (i = 0; instructions[i].opcode != NULL; i++)
 	{
-		line_number++;
-		opcode = strtok(line, " \n");
-
-		if (opcode == NULL)
+		if (strcmp(opcode, instructions[i].opcode) == 0)
 		{
-			continue;
-		}
-		if (strcmp(opcode, "push") == 0)
-		{
-			arg_str = strtok(NULL, " \n");
-
-			push(&stack, arg_str, line_number);
-		}
-		else
-		{
-			for (i = 0; instructions[i].opcode != NULL; i++)
-			{
-				if (strcmp(opcode, instructions[i].opcode) == 0)
-				{
-					instructions[i].f(&stack, arg_str, line_number);
-					break;
-				}
-			}
-			if (instructions[i].opcode == NULL)
-			{
-				fprintf(stderr, "L%d: unknown instruction %s\n", line_number, opcode);
-				exit(EXIT_FAILURE);
-			}
+			arg_str = opcode;
+			instructions[i].f(stack, arg_str, line_number);
+			break;
 		}
 	}
+	if (instructions[i].opcode == NULL)
+	{
+		fprintf(stderr, "L%d: unknown instruction %s\n", line_number, opcode);
+		exit(EXIT_FAILURE);
+	}
 }
-
+	
 /**
  * push- pushes an int to the stack
  * @stack: pointer to the stack
  * @arg_str: argument containing the int we need to push
  * @line_number: the int to be added to the stack
 */
-void push(stack_t **stack, char arg_str, unsigned int line_number)
+void push(stack_t **stack, char *arg_str, unsigned int line_number)
 {
 	stack_t *new_node = malloc(sizeof(stack_t));
+	int arg;
 
 	if (arg_str == NULL)
 	{
@@ -102,7 +87,7 @@ void push(stack_t **stack, char arg_str, unsigned int line_number)
  * @arg_str: argument containing the push command
  * @line_number: line number in the file
 */
-void pall(stack_t **stack, char arg_str, unsigned int line_number)
+void pall(stack_t **stack, char *arg_str, unsigned int line_number)
 {
 	stack_t *drifter;
 
@@ -143,8 +128,8 @@ void clear_stack(stack_t *stack)
 int main(int argc, char *argv[])
 {
 	stack_t *stack = NULL;
-	char line[100], *opcode, *arg_str;
-	int arg, line_number = 1, i;
+	char *opcode, line[100];
+	int line_number = 1;
 
 	if (argc != 2)
 	{
@@ -159,7 +144,12 @@ int main(int argc, char *argv[])
 		return (EXIT_FAILURE);
 	}
 
-	get_instruction(stack, arg_str, line_number);
+	while (fgets(line, sizeof(line), file))
+	{
+		line_number++;
+		opcode = strtok(line, " \n");
+		get_instruction(&stack, opcode, line_number);
+	}
 	clear_stack(stack);
 	fclose(file);
 	return (0);
