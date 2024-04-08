@@ -35,6 +35,7 @@
 *.i*86
 *.x86_64
 *.hex
+monty
 
 # Debug files
 *.dSYM/
@@ -56,3 +57,4 @@ test*
 temp*
 tmp*
 *.tmp
+*.m
