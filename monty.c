@@ -11,7 +11,7 @@ int handle_negative = 0;
 /**
  * push- pushes an int to the stack
  * @stack: pointer to the stack
- * @arg: the int to be added to the stack
+ * @line_number: the int to be added to the stack
 */
 void push(stack_t **stack, unsigned int line_number)
 {
@@ -43,13 +43,13 @@ void push(stack_t **stack, unsigned int line_number)
 	{
 		new_node->n = line_number;
 	}
-	if (*head == NULL)
+	if (*stack == NULL)
 	{
 		free(new_node);
-		*head = malloc(sizeof(stack_t));
-		(*head)->next = NULL;
-		(*head)->prev = NULL;
-		(*head)->n = data;
+		*stack = malloc(sizeof(stack_t));
+		(*stack)->next = NULL;
+		(*stack)->prev = NULL;
+		(*stack)->n = line_number;
 	}
 	else
 	{
