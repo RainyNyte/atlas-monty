@@ -2,18 +2,15 @@
 #define STACK_SIZE 1000
 #define EXIT_FAILURE 1
 
-/** define global variable stack */
-stack_t *stack = NULL;
-
 /**
  * push- pushes an int to the stack
  * @stack: pointer to the stack
  * @line_number: the int to be added to the stack
 */
-void push(stack_t **stack, unsigned int line_number)
+int push(stack_t **stack, unsigned int line_number)
 {
 	stack_t *new_node = malloc(sizeof(stack_t));
-	
+
 	if (new_node == NULL)
 	{
 		fprintf(stderr, "Error: malloc failure\n");
@@ -35,6 +32,7 @@ void push(stack_t **stack, unsigned int line_number)
 		*stack = new_node;
 	}
 	*stack = new_node;
+	return (1);
 }
 
 /**
@@ -74,6 +72,7 @@ void clear_stack(stack_t *stack)
 
 int main(int argc, char *argv[])
 {
+	stack_t *stack = NULL;
 	char line[100], *opcode, *arg_str;
 	int arg, line_number = 0, i;
 
@@ -90,12 +89,11 @@ int main(int argc, char *argv[])
 		return (EXIT_FAILURE);
 	}
 
-	instruction_t instructions[] =
-	{ 
+	instruction_t instructions[] = {
 		{"push", &push},
 		{"pall", &pall},
 		{NULL, NULL}
-	};
+		};
 
 	while (fgets(line, sizeof(line), file))
 	{
@@ -115,7 +113,7 @@ int main(int argc, char *argv[])
 				fprintf(stderr, "L%d: usage: push integer\n", line_number);
 				exit(EXIT_FAILURE);
 			}
-			else if(!isdigit(*arg_str) && *arg_str != '-' && *arg_str != '+')
+			else if (!isdigit(*arg_str) && *arg_str != '-' && *arg_str != '+')
 			{
 				fprintf(stderr, "L%d: usage: push integer\n", line_number);
 				exit(EXIT_FAILURE);
