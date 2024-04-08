@@ -26,9 +26,8 @@ void push(stack_t **stack, unsigned int line_number)
 
 	if (line_number < 1)
 	{
-		line_number = -line_number;
 		handle_negative = 1;
-		
+		exit(EXIT_FAILURE);
 	}
 	else
 	{
