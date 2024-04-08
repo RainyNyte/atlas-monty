@@ -5,9 +5,6 @@
 /** define global variable stack */
 stack_t *stack = NULL;
 
-/**global flag for negative values*/
-int handle_negative = 0;
-
 /**
  * push- pushes an int to the stack
  * @stack: pointer to the stack
@@ -24,24 +21,7 @@ void push(stack_t **stack, unsigned int line_number)
 		exit(EXIT_FAILURE);
 	}
 
-	if (line_number < 1)
-	{
-		handle_negative = 1;
-		exit(EXIT_FAILURE);
-	}
-	else
-	{
-		handle_negative = 0;
-	}
-
-	if (handle_negative == 1)
-	{
-	new_node->n = handle_negative;
-	}
-	else
-	{
-		new_node->n = line_number;
-	}
+	new_node->n = line_number;
 	if (*stack == NULL)
 	{
 		free(new_node);
@@ -54,8 +34,8 @@ void push(stack_t **stack, unsigned int line_number)
 	{
 		new_node->next = *stack;
 		new_node->prev = NULL;
-		*stack = new_node;
 	}
+	*stack = new_node;
 }
 
 /**
