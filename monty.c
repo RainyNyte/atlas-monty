@@ -5,6 +5,9 @@
 /** define global variable stack */
 stack_t *stack = NULL;
 
+/**global flag for negative values*/
+int handle_negative = 0;
+
 /**
  * push- pushes an int to the stack
  * @stack: pointer to the stack
@@ -17,10 +20,17 @@ void push(stack_t **stack, unsigned int line_number)
 	if (new_node == NULL)
 	{
 		fprintf(stderr, "Error: malloc failure\n");
+		clear_stack();
 		exit(EXIT_FAILURE);
 	}
 
-
+	if (line_number < 1)
+	{
+		line_number = -line_number;
+		handle_negative = 1;
+	}
+	else
+		handle_negative = 0;
 
 	new_node->n = line_number;
 	new_node->next = *stack;
