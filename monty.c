@@ -22,18 +22,17 @@ void push(stack_t **stack, unsigned int line_number)
 	}
 
 	new_node->n = line_number;
+	new_node->prev = NULL;
 	if (*stack == NULL)
 	{
-		free(new_node);
-		*stack = malloc(sizeof(stack_t));
-		(*stack)->next = NULL;
-		(*stack)->prev = NULL;
-		(*stack)->n = line_number;
+		new_node->next = NULL;
+		*stack = new_node;
 	}
 	else
 	{
 		new_node->next = *stack;
-		new_node->prev = NULL;
+		(*stack)->prev = new_node;
+		*stack = new_node;
 	}
 	*stack = new_node;
 }
