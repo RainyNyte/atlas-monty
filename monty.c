@@ -28,14 +28,35 @@ void push(stack_t **stack, unsigned int line_number)
 	{
 		line_number = -line_number;
 		handle_negative = 1;
+		
 	}
 	else
+	{
 		handle_negative = 0;
+	}
 
-	new_node->n = line_number;
-	new_node->next = *stack;
-	new_node->prev = NULL;
-	*stack = new_node;
+	if (handle_negative == 1)
+	{
+	new_node->n = handle_negative;
+	}
+	else
+	{
+		new_node->n = line_number;
+	}
+	if (*head == NULL)
+	{
+		free(new_node);
+		*head = malloc(sizeof(stack_t));
+		(*head)->next = NULL;
+		(*head)->prev = NULL;
+		(*head)->n = data;
+	}
+	else
+	{
+		new_node->next = *stack;
+		new_node->prev = NULL;
+		*stack = new_node;
+	}
 }
 
 /**
@@ -104,7 +125,9 @@ int main(int argc, char *argv[])
 		opcode = strtok(line, " \n");
 
 		if (opcode == NULL)
+		{
 			continue;
+		}
 		if (strcmp(opcode, "push") == 0)
 		{
 			arg_str = strtok(NULL, " \n");
