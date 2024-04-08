@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 {
 	stack_t *stack = NULL;
 	char *opcode, line[100];
-	int line_number = 1;
+	int line_number = 0;
 
 	if (argc != 2)
 	{
