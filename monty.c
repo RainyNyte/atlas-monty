@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
 				fprintf(stderr, "L%d: usage: push integer\n", line_number);
 				exit(EXIT_FAILURE);
 			}
-			elseif(!isdigit(*arg_str) && *arg_str != '-' && *arg_str != '+')
+			else if(!isdigit(*arg_str) && *arg_str != '-' && *arg_str != '+')
 			{
 				fprintf(stderr, "L%d: usage: push integer\n", line_number);
 				exit(EXIT_FAILURE);
