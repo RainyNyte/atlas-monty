@@ -10,7 +10,7 @@ stack_t *stack = NULL;
  * @stack: pointer to the stack
  * @arg: the int to be added to the stack
 */
-void push(stack_t **stack, int arg)
+void push(stack_t **stack, unsigned int line_number)
 {
 	stack_t *new_node = malloc(sizeof(stack_t));
 	
@@ -22,7 +22,7 @@ void push(stack_t **stack, int arg)
 
 
 
-	new_node->n = arg;
+	new_node->n = line_number;
 	new_node->next = *stack;
 	new_node->prev = NULL;
 	*stack = new_node;
@@ -31,8 +31,9 @@ void push(stack_t **stack, int arg)
 /**
  * pall- prints the entire stack from top to bottom
  * @stack: pointer to the stack
+ * @line_number: line number in the file
 */
-void pall(stack_t **stack)
+void pall(stack_t **stack, unsigned int line_number)
 {
 	stack_t *drifter;
 
@@ -42,6 +43,7 @@ void pall(stack_t **stack)
 		printf("%d\n", drifter->n);
 		drifter = drifter->next;
 	}
+	(void)line_number;
 }
 
 /**
