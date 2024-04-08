@@ -7,7 +7,7 @@
  * @stack: pointer to the stack
  * @line_number: the int to be added to the stack
 */
-int push(stack_t **stack, unsigned int line_number)
+void push(stack_t **stack, unsigned int line_number)
 {
 	stack_t *new_node = malloc(sizeof(stack_t));
 
@@ -32,7 +32,6 @@ int push(stack_t **stack, unsigned int line_number)
 		*stack = new_node;
 	}
 	*stack = new_node;
-	return (1);
 }
 
 /**
