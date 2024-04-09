@@ -24,7 +24,7 @@ int get_instruction(char *op_code, stack_t **stack)
 		};
 
 	/* tokenize op_code into executable name and number (if exists) */
-	op_token = strtok(op_code, " \n");
+	op_token = strtok(op_code, " \n\t");
 
 	while (ops[i].opcode != NULL && op_token != NULL)
 	{
@@ -41,7 +41,7 @@ int get_instruction(char *op_code, stack_t **stack)
 		if (isdigit(op_token) != 0)
 			break;
 		fprintf(stderr, " %s", op_token);
-		op_token = strtok(NULL, " \n");
+		op_token = strtok(NULL, " \n\t");
 	}
 	fprintf(stderr, "\n");
 	return (0);
