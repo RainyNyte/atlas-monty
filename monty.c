@@ -35,14 +35,10 @@ int get_instruction(char *op_code, stack_t **stack)
 		}
 		i++;
 	}
-
-	fprintf(stderr, "L%zu: unknown instruction ", line_ct);
-	while (op_token != NULL)
+	if (strcmp(op_token, ops[i].opcode) == 1)
 	{
-		fprintf(stderr, "%s ", op_token);
-		op_token = strtok(NULL, " \n");
+		fprintf(stderr, "L%zu: unknown instruction %s\n", line_ct, op_token);
 	}
-	fprintf(stderr, "\n");
 	return (0);
 }
 
