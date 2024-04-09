@@ -3,6 +3,7 @@
 #define EXIT_FAILURE 1
 
 size_t line_ct = 0;
+global_m globm;
 
 /**
  * get_instruction- determines the instruction to be called

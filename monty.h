@@ -55,7 +55,6 @@ typedef struct global_var
 	FILE *fp;
 } global_m;
 
-extern global_m globm;
 
 void clear_stack(stack_t *stack);
 void get_instruction(char *opcode);
