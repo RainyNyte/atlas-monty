@@ -4,6 +4,26 @@
 
 size_t line_ct = 0;
 
+char* removeIntandSpace(char* input) 
+{
+	char* dest = input;
+	char* src = input;
+	while (*src) 
+	{
+		while (*src == ' ') 
+		{
+			++src;
+		}
+		if (isdigit(*src))
+		{
+			src++;
+			continue;
+		}
+	*dest++ = *src++;
+	}
+	*dest = '\0';
+	return input;
+}
 /**
  * get_instruction- determines the instruction to be called
  * @stack: pointer to the stack
@@ -37,6 +57,7 @@ int get_instruction(char *op_code, stack_t **stack)
 	}
 	if (strcmp(op_token, ops[i].opcode) == 1)
 	{
+		removeIntandSpace(op_token);
 		fprintf(stderr, "L%zu: unknown instruction %s\n", line_ct, op_token);
 	}
 	return (0);
