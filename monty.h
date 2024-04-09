@@ -41,7 +41,6 @@ typedef struct instruction_s
 void clear_stack(stack_t *stack);
 int get_instruction(char *op_code, stack_t **stack);
 stack_t *create_node(int n);
-char* removeIntandSpace(char* input);
 int push(stack_t **stack);
 int pall(stack_t **stack);
 int pint(stack_t **stack);
