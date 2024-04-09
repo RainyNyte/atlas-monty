@@ -6,6 +6,7 @@
 #include <string.h>
 #include <strings.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 /**
  * struct stack_s - doubly linked list representation of a stack (or queue)
@@ -34,17 +35,18 @@ typedef struct stack_s
 typedef struct instruction_s
 {
         char *opcode;
-        void (*f)(stack_t **stack, char *arg_str, unsigned int line_number);
+        int (*f)(stack_t **stack);
 } instruction_t;
 
 void clear_stack(stack_t *stack);
-void get_instruction(stack_t **stack, char *opcode, unsigned int line_number);
-void push(stack_t **stack, char *arg_str, unsigned int line_number);
-void pall(stack_t **stack, char *arg_str, unsigned int line_number);
-void pint(stack_t **stack, char *arg_str, unsigned int line_number);
-void pop(stack_t **stack, char *arg_str, unsigned int line_number);
-void swap(stack_t **stack, char *arg_str, unsigned int line_number);
-void add(stack_t **stack, char *arg_str, unsigned int line_number);
-void nop(stack_t **stack, char *arg_str, unsigned int line_number);
+int get_instruction(char *op_code, stack_t **stack);
+stack_t *create_node(int n);
+int push(stack_t **stack);
+int pall(stack_t **stack);
+int pint(stack_t **stack);
+int pop(stack_t **stack);
+int swap(stack_t **stack);
+int add(stack_t **stack);
+int nop(stack_t **stack);
 
 #endif

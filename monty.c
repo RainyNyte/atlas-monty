@@ -2,6 +2,8 @@
 #define STACK_SIZE 1000
 #define EXIT_FAILURE 1
 
+size_t line_ct = 0;
+
 /**
  * get_instruction- determines the instruction to be called
  * @stack: pointer to the stack
@@ -9,96 +11,124 @@
  * @line_number: the current line number in the file
 */
 
-void get_instruction(stack_t **stack, char* opcode, unsigned int line_number)
+int get_instruction(char *op_code, stack_t **stack)
 {
-	instruction_t instructions[] = {
-		{"push", &push},
-		{"pall", &pall},
-		{NULL, NULL}
-		};
-	char *arg_str;
-	int i;
+	char *op_token;
+	unsigned int i = 0;;
 
-	for (i = 0; instructions[i].opcode != NULL; i++)
+	/* array of structs containing instruction and matching function */
+	instruction_t ops[] = { 
+		{"push", push}, 
+		{"pall", pall}, 
+		{NULL, NULL} 
+		};
+
+	/* tokenize op_code into executable name and number (if exists) */
+	op_token = strtok(op_code, " \n");
+
+	while (ops[i].opcode != NULL && op_token != NULL)
 	{
-		if (strcmp(opcode, instructions[i].opcode) == 0)
+		/* checks opcode, runs matching function */
+		if (strcmp(op_token, ops[i].opcode) == 0)
 		{
-			arg_str = opcode;
-			instructions[i].f(stack, arg_str, line_number);
-			break;
+			return (ops[i].f(stack));
 		}
+		i++;
 	}
-	if (instructions[i].opcode == NULL)
+
+	fprintf(stderr, "L%zu: unknown instruction ", line_ct);
+	while (op_token != NULL)
 	{
-		fprintf(stderr, "L%d: unknown instruction %s\n", line_number, opcode);
-		exit(EXIT_FAILURE);
+		fprintf(stderr, "%s ", op_token);
+		op_token = strtok(NULL, " \n");
 	}
+	fprintf(stderr, "\n");
+	return (0);
+}
+
+/**
+ * create_node - initializes a new stack_t node
+ * @n: integer to initialize new node with
+ *
+ * Return: pointer to newly created node, NULL if failure
+ */
+stack_t *create_node(int n)
+{
+	stack_t *new;
+
+	/* MALLOC ALERT */
+	new = malloc(sizeof(stack_t));
+
+	if (new == NULL)
+	{
+		fprintf(stderr, "Error: malloc failed\n");
+		return (NULL);
+	}
+
+	new->n = n;
+	new->next = NULL;
+	new->prev = NULL;
+
+	return (new);
 }
 	
 /**
  * push- pushes an int to the stack
  * @stack: pointer to the stack
- * @arg_str: argument containing the int we need to push
- * @line_number: the int to be added to the stack
 */
-void push(stack_t **stack, char *arg_str, unsigned int line_number)
+int push(stack_t **stack)
 {
-	stack_t *new_node = malloc(sizeof(stack_t));
-	int arg;
+	stack_t *new;
+	char *tmp;
+	int push_num;
 
-	if (arg_str == NULL)
-	{
-		fprintf(stderr, "L%d: usage: push integer\n", line_number);
-		exit(EXIT_FAILURE);
-	}
-	else if (!isdigit(*arg_str) && *arg_str != '-' && *arg_str != '+')
-	{
-		fprintf(stderr, "L%d: usage: push integer\n", line_number);
-		exit(EXIT_FAILURE);
-	}
-	arg = atoi(arg_str);
+	tmp = strtok(NULL, " \n");
 
-	if (new_node == NULL)
+	if (tmp != NULL)
+		push_num = atoi(tmp);
+	/* checks for push without number */
+	if (tmp == NULL || ((push_num == 0) && strcmp(tmp, "0") != 0))
 	{
-		fprintf(stderr, "Error: malloc failure\n");
-		clear_stack(*stack);
-		exit(EXIT_FAILURE);
+		fprintf(stderr, "L%zu: usage: push integer\n", line_ct);
+        return (0);
 	}
 
-	new_node->n = arg;
-	new_node->prev = NULL;
+	new = create_node(push_num);
+
+	if (new == NULL)
+		return (0);
+
 	if (*stack == NULL)
 	{
-		new_node->next = NULL;
-		*stack = new_node;
+		*stack = new;
+		return (1);
 	}
-	else
-	{
-		new_node->next = *stack;
-		(*stack)->prev = new_node;
-		*stack = new_node;
-	}
-	*stack = new_node;
+
+	new->next = *stack;
+	(*stack)->prev = new;
+
+	*stack = new;
+
+	return (1);
 }
 
 /**
  * pall- prints the entire stack from top to bottom
  * @stack: pointer to the stack
- * @arg_str: argument containing the push command
- * @line_number: line number in the file
 */
-void pall(stack_t **stack, char *arg_str, unsigned int line_number)
+int pall(stack_t **head)
 {
-	stack_t *drifter;
+	stack_t *tmp = NULL;
 
-	drifter = *stack;
-	while (drifter)
+	tmp = *head;
+	
+	while (tmp != NULL)
 	{
-		printf("%d\n", drifter->n);
-		drifter = drifter->next;
+		printf("%d\n", tmp->n);
+		tmp = tmp->next;
 	}
-	(void)arg_str;
-	(void)line_number;
+
+	return (1);
 }
 
 /**
@@ -119,6 +149,25 @@ void clear_stack(stack_t *stack)
 }
 
 /**
+ * only_whitespace - find if string is made entirely of whitespace
+ * @str: the string to check
+ *
+ * Return: false if non-whitespace found, true if string is entirely whitespace
+ */
+bool only_whitespace(char *str)
+{
+	while (*str)
+	{
+		if (*str != ' ' && *str != '\n' && *str != '\t')
+		{
+			return (false);
+		}
+		str++;
+	}
+	return (true);
+}
+
+/**
  * main- entry point for the monty interpreter
  * @argc: number of arguments supplied
  * @argv: the arguments that were supplied to the interpreter
@@ -127,30 +176,52 @@ void clear_stack(stack_t *stack)
 */
 int main(int argc, char *argv[])
 {
+	// char *instruction;
+	char *line_buf = NULL;
+	FILE *file;
+	size_t buf_len = 0;
+	ssize_t read;
 	stack_t *stack = NULL;
-	char *opcode, line[100];
-	int line_number = 0;
+	bool failure = false;
 
 	if (argc != 2)
 	{
 		fprintf(stderr, "USAGE: monty file\n");
-		return (EXIT_FAILURE);
+		exit(EXIT_FAILURE);
 	}
-	FILE *file = fopen(argv[1], "r");
 
+	file = fopen(argv[1], "r");
 	if (file == NULL)
 	{
 		fprintf(stderr, "Error: Can't open file %s\n", argv[1]);
-		return (EXIT_FAILURE);
+		exit(EXIT_FAILURE);
 	}
 
-	while (fgets(line, sizeof(line), file))
+	/* central loop to get instructions from file */
+	while ((read = getline(&line_buf, &buf_len, file)) != -1)
 	{
-		line_number++;
-		opcode = strtok(line, " \n");
-		get_instruction(&stack, opcode, line_number);
+		line_ct++;
+		/* if (string_trim(line_buf) == NULL)
+			continue;
+		instruction = string_trim(line_buf);*/
+		if (only_whitespace(line_buf))
+			continue;
+		if (get_instruction(line_buf, &stack) == 0)
+		{
+			failure = true;
+			break;
+		}
 	}
+
 	clear_stack(stack);
+	stack = NULL;
+
 	fclose(file);
+	if (line_buf != NULL)
+		free(line_buf);
+
+	if (failure == true)
+		exit(EXIT_FAILURE);
+
 	return (0);
 }
