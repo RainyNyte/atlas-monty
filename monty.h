@@ -35,18 +35,39 @@ typedef struct stack_s
 typedef struct instruction_s
 {
         char *opcode;
-        int (*f)(stack_t **stack);
+        void (*f)(stack_t **stack, unsigned int line_number);
 } instruction_t;
 
+/**
+ * struct global_var - contains global variables
+ * @gbuff: getline buffer;
+ * @n: argument of opcode (value of stack)
+ * @head: head of stack
+ * @line_number: keeps track of current line #
+ * @fp: pointer to file descriptor
+ */
+typedef struct global_var
+{
+	char *gbuff;
+	char *n;
+	stack_t *head;
+	unsigned int line_number;
+	FILE *fp;
+} global_m;
+
+extern global_m globm;
+
 void clear_stack(stack_t *stack);
-int get_instruction(char *op_code, stack_t **stack);
+void get_instruction(char *opcode);
 stack_t *create_node(int n);
-int push(stack_t **stack);
-int pall(stack_t **stack);
-int pint(stack_t **stack);
-int pop(stack_t **stack);
-int swap(stack_t **stack);
-int add(stack_t **stack);
-int nop(stack_t **stack);
+void set_global(void);
+void cleanup(void);
+void push(stack_t **stack, unsigned int line_number);
+void pall(stack_t **stack, unsigned int line_number);
+void pint(stack_t **stack, unsigned int line_number);
+void pop(stack_t **stack, unsigned int line_number);
+void swap(stack_t **stack, unsigned int line_number);
+void add(stack_t **stack, unsigned int line_number);
+void nop(stack_t **stack, unsigned int line_number);
 
 #endif

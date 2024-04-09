@@ -11,10 +11,9 @@ size_t line_ct = 0;
  * @line_number: the current line number in the file
 */
 
-int get_instruction(char *op_code, stack_t **stack)
+void get_instruction(char *opcode)
 {
-	char *op_token;
-	unsigned int i = 0;;
+	unsigned int i = 0;
 
 	/* array of structs containing instruction and matching function */
 	instruction_t ops[] = { 
@@ -23,28 +22,15 @@ int get_instruction(char *op_code, stack_t **stack)
 		{NULL, NULL} 
 		};
 
-	/* tokenize op_code into executable name and number (if exists) */
-	op_token = strtok(op_code, " \n\t");
-
-	while (ops[i].opcode != NULL && op_token != NULL)
-	{
-		/* checks opcode, runs matching function */
-		if (strcmp(op_token, ops[i].opcode) == 0)
+	for (i = 0; ops[i].opcode && opcode; i++)
+		if (!strcmp(opcode, ops[i].opcode))
 		{
-			return (ops[i].f(stack));
+			ops[i].f(&(globm.head), globm.line_number);
 		}
-		i++;
-	}
-	fprintf(stderr, "L%zu: unknown instruction ", line_ct);
-	while (op_token != NULL)
-	{
-		if (isdigit(op_token) != 0)
-			break;
-		fprintf(stderr, " %s", op_token);
-		op_token = strtok(NULL, " \n\t");
-	}
-	fprintf(stderr, "\n");
-	return (0);
+
+	dprintf(2, "L%d: unknown instruction %s\n",
+		globm.line_number, opcode);
+	exit(EXIT_FAILURE);
 }
 
 /**
@@ -76,60 +62,59 @@ stack_t *create_node(int n)
 /**
  * push- pushes an int to the stack
  * @stack: pointer to the stack
+ * @line_number: line number in the file
 */
-int push(stack_t **stack)
+void push(stack_t **stack, unsigned int line_number)
 {
+	int n;
 	stack_t *new;
-	char *tmp;
-	int push_num;
 
-	tmp = strtok(NULL, " \n");
-
-	if (tmp != NULL)
-		push_num = atoi(tmp);
-	/* checks for push without number */
-	if (tmp == NULL || ((push_num == 0) && strcmp(tmp, "0") != 0))
+	if (!isdigit(globm.n))
 	{
-		fprintf(stderr, "L%zu: usage: push integer\n", line_ct);
-        return (0);
+		dprintf(2, "L%d: usage: push integer\n", line_number);
+		cleanup();
+		exit(EXIT_FAILURE);
 	}
 
-	new = create_node(push_num);
-
-	if (new == NULL)
-		return (0);
+	n = atoi(globm.n);
+	new = create_node(n);
 
 	if (*stack == NULL)
 	{
 		*stack = new;
-		return (1);
 	}
 
 	new->next = *stack;
 	(*stack)->prev = new;
 
 	*stack = new;
+}
 
-	return (1);
+/**
+ * cleanup - performs exit operations (free/close)
+ * Return: No Return
+ */
+void cleanup(void)
+{
+	free(globm.gbuff), fclose(globm.fp);
+	clear_stack(globm.head);
 }
 
 /**
  * pall- prints the entire stack from top to bottom
  * @stack: pointer to the stack
+ * line_number: line number of the file
 */
-int pall(stack_t **head)
+void pall(stack_t **stack, unsigned int line_number)
 {
-	stack_t *tmp = NULL;
+	stack_t *drifter = *stack;
 
-	tmp = *head;
-	
-	while (tmp != NULL)
+	(void) line_number;
+	while (stack && drifter)
 	{
-		printf("%d\n", tmp->n);
-		tmp = tmp->next;
+		printf("%d\n", drifter->n);
+		drifter = drifter->next;
 	}
-
-	return (1);
 }
 
 /**
@@ -169,6 +154,19 @@ bool only_whitespace(char *str)
 }
 
 /**
+ * set_global - defines global variables
+ *
+ * Return: No return
+ */
+void set_global(void)
+{
+	globm.gbuff = NULL;
+	globm.n = NULL;
+	globm.head = NULL;
+	globm.line_number = 0;
+}
+
+/**
  * main- entry point for the monty interpreter
  * @argc: number of arguments supplied
  * @argv: the arguments that were supplied to the interpreter
@@ -177,52 +175,39 @@ bool only_whitespace(char *str)
 */
 int main(int argc, char *argv[])
 {
-	// char *instruction;
-	char *line_buf = NULL;
-	FILE *file;
-	size_t buf_len = 0;
-	ssize_t read;
-	stack_t *stack = NULL;
-	bool failure = false;
+	
+	char *buff = NULL, *dlim = " \n\t", *optok = NULL;
+	size_t buff_size = 0;
+	ssize_t line_size;
+	FILE *fp;
 
 	if (argc != 2)
+		dprintf(2, "USAGE: monty file\n"), exit(EXIT_FAILURE);
+
+	fp  = fopen(argv[1], "r");
+	if (!fp)
 	{
-		fprintf(stderr, "USAGE: monty file\n");
+		dprintf(2, "Error: Can't open file %s\n", argv[1]);
 		exit(EXIT_FAILURE);
 	}
 
-	file = fopen(argv[1], "r");
-	if (file == NULL)
+	globm.fp = fp;
+	set_global();
+	line_size = getline(&buff, &buff_size, globm.fp);
+	globm.gbuff = buff;
+	while (line_size >= 0)
 	{
-		fprintf(stderr, "Error: Can't open file %s\n", argv[1]);
-		exit(EXIT_FAILURE);
-	}
+		globm.line_number += 1;
+		optok = strtok(buff, dlim);
 
-	/* central loop to get instructions from file */
-	while ((read = getline(&line_buf, &buf_len, file)) != -1)
-	{
-		line_ct++;
-		/* if (string_trim(line_buf) == NULL)
-			continue;
-		instruction = string_trim(line_buf);*/
-		if (only_whitespace(line_buf))
-			continue;
-		if (get_instruction(line_buf, &stack) == 0)
+		if (optok && optok[0] != '#')
 		{
-			failure = true;
-			break;
+			globm.n = strtok(NULL, dlim);
+			get_instruction(optok);
 		}
+		line_size = getline(&buff, &buff_size, globm.fp);
+		optok = NULL, globm.n = NULL;
 	}
-
-	clear_stack(stack);
-	stack = NULL;
-
-	fclose(file);
-	if (line_buf != NULL)
-		free(line_buf);
-
-	if (failure == true)
-		exit(EXIT_FAILURE);
-
+	cleanup();
 	return (0);
 }
