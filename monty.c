@@ -27,6 +27,7 @@ void get_instruction(char *opcode)
 		if (!strcmp(opcode, ops[i].opcode))
 		{
 			ops[i].f(&(globm.head), globm.line_number);
+			return;
 		}
 
 	dprintf(2, "L%d: unknown instruction %s\n",
@@ -70,7 +71,7 @@ void push(stack_t **stack, unsigned int line_number)
 	int n;
 	stack_t *new;
 
-	if (!isdigit(globm.n))
+	if (!isdigit(globm.n[0]) && !(globm.n[0] == '-' && isdigit(globm.n[1])))
 	{
 		dprintf(2, "L%d: usage: push integer\n", line_number);
 		cleanup();
@@ -84,11 +85,13 @@ void push(stack_t **stack, unsigned int line_number)
 	{
 		*stack = new;
 	}
+	else
+	{
+		new->next = *stack;
+		(*stack)->prev = new;
 
-	new->next = *stack;
-	(*stack)->prev = new;
-
-	*stack = new;
+		*stack = new;
+	}
 }
 
 /**
