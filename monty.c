@@ -51,7 +51,7 @@ stack_t *create_node(int n)
 	if (new == NULL)
 	{
 		fprintf(stderr, "Error: malloc failed\n");
-		cleanup():
+		cleanup();
 		exit(EXIT_FAILURE);
 ;
 	}
@@ -205,6 +205,10 @@ int main(int argc, char *argv[])
 	{
 		globm.line_number += 1;
 		optok = strtok(buff, dlim);
+		if (optok[strlen(optok) - 1] == '$')
+		{
+			optok[strlen(optok) - 1] = '\0';
+		}
 
 		if (optok && optok[0] != '#')
 		{
