@@ -73,7 +73,7 @@ void push(stack_t **stack, unsigned int line_number)
 	int n;
 	stack_t *new;
 
-	if (globm.n == NULL || !isdigit(globm.n[0]) && !(globm.n[0] == '-' && isdigit(globm.n[1])))
+	if (globm.n == NULL || (!isdigit(globm.n[0]) && !(globm.n[0] == '-' && isdigit(globm.n[1]))))
 	{
 		dprintf(2, "L%d: usage: push integer\n", line_number);
 		cleanup();
@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
 		}
 		line_size = getline(&buff, &buff_size, globm.fp);
 		buff = globm.gbuff;
-		optok = NULL
+		optok = NULL;
 		globm.n = NULL;
 	}
 	cleanup();
