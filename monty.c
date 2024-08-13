@@ -51,7 +51,9 @@ stack_t *create_node(int n)
 	if (new == NULL)
 	{
 		fprintf(stderr, "Error: malloc failed\n");
-		return (NULL);
+		cleanup():
+		exit(EXIT_FAILURE);
+;
 	}
 
 	new->n = n;
@@ -195,8 +197,8 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	globm.fp = fp;
 	set_global();
+	globm.fp = fp;
 	line_size = getline(&buff, &buff_size, globm.fp);
 	globm.gbuff = buff;
 	while (line_size >= 0)
